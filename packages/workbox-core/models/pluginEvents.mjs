@@ -22,4 +22,5 @@ export default {
   CACHED_RESPONSE_WILL_BE_USED: 'cachedResponseWillBeUsed',
   FETCH_DID_FAIL: 'fetchDidFail',
   REQUEST_WILL_FETCH: 'requestWillFetch',
+  FETCH_DID_SUCCEED: 'fetchDidSucceed',
 };

@@ -71,11 +71,14 @@ const wrappedFetch = async (request,
   const failedFetchPlugins = pluginUtils.filter(
     plugins, pluginEvents.FETCH_DID_FAIL);
 
+  const fetchDidSucceedPlugins = pluginUtils.filter(
+    plugins, pluginEvents.FETCH_DID_SUCCEED);
+
   // If there is a fetchDidFail plugin, we need to save a clone of the
   // original request before it's either modified by a requestWillFetch
   // plugin or before the original request's body is consumed via fetch().
-  const originalRequest = failedFetchPlugins.length > 0 ?
-    request.clone() : null;
+  const originalRequest = failedFetchPlugins.length > 0
+  || fetchDidSucceedPlugins.length > 0 ? request.clone() : null;
 
   try {
     for (let plugin of plugins) {
@@ -113,6 +116,15 @@ const wrappedFetch = async (request,
       `'${getFriendlyURL(request.url)}' returned a response with ` +
       `status '${fetchResponse.status}'.`);
     }
+
+    for (let plugin of fetchDidSucceedPlugins) {
+      await plugin[pluginEvents.FETCH_DID_SUCCEED].call(plugin, {
+        originalRequest: originalRequest.clone(),
+        request: pluginFilteredRequest.clone(),
+        response: fetchResponse,
+      });
+    }
+
     return fetchResponse;
   } catch (error) {
     if (process.env.NODE_ENV !== 'production') {
